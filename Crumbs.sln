@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crumbs.Core", "src\Crumbs.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crumbs.Serializers.Json", "src\Crumbs.Serializers.Json\Crumbs.Serializers.Json.csproj", "{29A23E72-F78C-47B0-A08B-19EE728CA14A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crumbs.History", "src\Crumbs.History\Crumbs.History.csproj", "{0847FEBA-8E29-4187-A3B1-4DBEC2515992}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{29A23E72-F78C-47B0-A08B-19EE728CA14A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29A23E72-F78C-47B0-A08B-19EE728CA14A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29A23E72-F78C-47B0-A08B-19EE728CA14A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0847FEBA-8E29-4187-A3B1-4DBEC2515992}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0847FEBA-8E29-4187-A3B1-4DBEC2515992}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0847FEBA-8E29-4187-A3B1-4DBEC2515992}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0847FEBA-8E29-4187-A3B1-4DBEC2515992}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
