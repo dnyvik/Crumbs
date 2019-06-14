@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Crumbs.Core.Event
+namespace Crumbs.Core.Event.EventualConsistency
 {
     /// <summary>
     /// For eventually consistency. Needs a better name!

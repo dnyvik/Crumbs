@@ -1,6 +1,6 @@
-﻿namespace Crumbs.EventualConsistency
+﻿namespace Crumbs.Core.Event.EventualConsistency
 {
-    public enum HandlerStatus
+    public enum StatefulHandlerStatus
     {
         Stopped,
         SpoolingHistory,

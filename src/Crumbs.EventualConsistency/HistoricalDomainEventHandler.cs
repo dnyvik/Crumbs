@@ -1,4 +1,5 @@
 ﻿using Crumbs.Core.Event;
+using Crumbs.Core.Event.EventualConsistency;
 using Crumbs.Core.Event.Framework;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 namespace Crumbs.EventualConsistency
 {
     // Todo: Rename
-    public abstract class HistoricalDomainEventHandler<T> : IStatefulEventHandler<T>, IDisposable where T : EventHandlerState
+    public abstract class HistoricalDomainEventHandler<T> : IStatefulEventHandler<T>, IDisposable where T : IEventHandlerState
     {
         private readonly IEventStreamer _eventStreamer;
         private readonly IEventHandlerStateStore _eventHandlerStateStore;
@@ -104,12 +105,12 @@ namespace Crumbs.EventualConsistency
         {
             _stateContainer = await _eventHandlerStateStore.Get<T>(stateKey) ?? CreateDefaultStateContainer(stateKey, initalState);
 
-            if (_stateContainer.HandlerStatus == HandlerStatus.Faulted)
+            if (_stateContainer.HandlerStatus == StatefulHandlerStatus.Faulted)
             {
                 throw new Exception("Prior state suggests that handler is in an invalid state. Consider reinitializing handler.");
             }
 
-            _stateContainer.HandlerStatus = HandlerStatus.SpoolingHistory;
+            _stateContainer.HandlerStatus = StatefulHandlerStatus.SpoolingHistory;
             State = _stateContainer.State;
         }
 
@@ -120,7 +121,7 @@ namespace Crumbs.EventualConsistency
                 Id = stateKey,
                 ProcessedEventId = -1,
                 State = initalState,
-                HandlerStatus = HandlerStatus.SpoolingHistory,
+                HandlerStatus = StatefulHandlerStatus.SpoolingHistory,
             };
         }
 
@@ -179,7 +180,7 @@ namespace Crumbs.EventualConsistency
 
         private void UpdateAuditInformation(IDomainEvent e)
         {
-            State.LastUpdated = e.Timestamp;
+            _stateContainer.LastUpdated = e.Timestamp;
             _stateContainer.ProcessedEventId = e.Id;
         }
 
@@ -294,7 +295,7 @@ namespace Crumbs.EventualConsistency
         private async Task HistoryLoaded()
         {
             IsLoadingHistoricalEvents = false;
-            _stateContainer.HandlerStatus = HandlerStatus.Running;
+            _stateContainer.HandlerStatus = StatefulHandlerStatus.Running;
             await Save();
         }
 
@@ -319,7 +320,7 @@ namespace Crumbs.EventualConsistency
             try
             {
                 await RollbackState();
-                _stateContainer.HandlerStatus = HandlerStatus.Faulted;
+                _stateContainer.HandlerStatus = StatefulHandlerStatus.Faulted;
                 await _eventHandlerStateStore.Save(_stateContainer);
                 OnFaulted(_stateContainer.Id);
             }
