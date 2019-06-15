@@ -5,8 +5,7 @@ namespace Crumbs.Core.Event
 {
     public interface IDomainEvent : IMessage
     {
-        // Todo: long?
-        int Id { get; set; }
+        long Id { get; set; }
         Guid AppliedByUserId { get; set; }
         Guid AggregateId { get; set; }
         int Version { get; set; }

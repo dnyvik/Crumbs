@@ -6,7 +6,7 @@ namespace Crumbs.Core.Event
     public abstract class DomainEvent : IDomainEvent
     {
         [IgnoreDataMember]
-        public int Id { get; set; }
+        public long Id { get; set; }
         [IgnoreDataMember]
         public Guid AppliedByUserId { get; set; }
         [IgnoreDataMember]

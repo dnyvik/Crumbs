@@ -11,7 +11,7 @@ namespace Crumbs.Core.Event
         Task<IReadOnlyCollection<IDomainEvent>> Get(Guid aggregateId, int fromVersion);
         Task<IReadOnlyCollection<IDomainEvent>> Get(Guid aggregateId, DateTimeOffset fromDate);
         Task<IReadOnlyCollection<IDomainEvent>> GetAll();
-        Task<IReadOnlyCollection<IDomainEvent>> GetAllAfter(int eventId, int? batchSize = null);
+        Task<IReadOnlyCollection<IDomainEvent>> GetAllAfter(long eventId, int? batchSize = null);
         Task<IReadOnlyCollection<IDomainEvent>> Get(Guid aggregateId, int page, int itemsPerPage);
         Task<IEnumerable<IDomainEvent>> Save(IEnumerable<IDomainEvent> events, Guid? sessionKey = null);
 

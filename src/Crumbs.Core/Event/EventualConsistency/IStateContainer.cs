@@ -7,7 +7,7 @@ namespace Crumbs.Core.Event.EventualConsistency
         StatefulHandlerStatus HandlerStatus { get; set; }
         Guid Id { get; set; }
         DateTimeOffset LastUpdated { get; set; }
-        int ProcessedEventId { get; set; }
+        long ProcessedEventId { get; set; }
         T State { get; set; }
     }
 }

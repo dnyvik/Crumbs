@@ -81,7 +81,7 @@ namespace Crumbs.EFCore
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyCollection<IDomainEvent>> GetAllAfter(int eventId, int? batchSize = null)
+        public Task<IReadOnlyCollection<IDomainEvent>> GetAllAfter(long eventId, int? batchSize = null)
         {
             throw new NotImplementedException();
         }
@@ -106,7 +106,7 @@ namespace Crumbs.EFCore
 
                 foreach (var d in eventData)
                 {
-                    d.DomainEvent.Id = Convert.ToInt32(d.Entity.EventId); //Todo: Update interface
+                    d.DomainEvent.Id = d.Entity.EventId;
                 }
 
                 // Todo: Need ordering?
@@ -138,7 +138,7 @@ namespace Crumbs.EFCore
             domainEvent.AppliedByUserId = entity.AppliedByUserId;
             domainEvent.Version = entity.AggregateVersion;
             domainEvent.Timestamp = entity.Timestamp;
-            domainEvent.Id = Convert.ToInt32(entity.EventId); // Todo: Update interface
+            domainEvent.Id = entity.EventId;
 
             return domainEvent;
         }
