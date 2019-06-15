@@ -2,7 +2,7 @@ using System;
 
 namespace Crumbs.Core.Configuration
 {
-    public static class EventPlatformBootstrapper
+    public static class CrumbsBootstrapper
     {
         private static bool _initialized;
 
