@@ -1,7 +1,7 @@
 # Crumbs
 WIP
 
-Current config works for testing (gives you a resolver back which you can use to get other). Expect major changes!
+Use current config for testing (returns a resolver). Expect major changes!
 ```
  CrumbsBootstrapper.Configure()
         .UseServiceCollection(servieCollection)
@@ -9,7 +9,7 @@ Current config works for testing (gives you a resolver back which you can use to
         .UseSnapshotAllStrategy()
         .UseJsonSerializers()
         .UseHandlersFrom(Assembly.GetExecutingAssembly())
-        .UseSqliteTest(servieCollection, "Data Source=YourNameHere.db")
+        .UseSqlite("Data Source=YourNameHere.db")
         .UseDefaultStores()
         .TestRun();
 ```
