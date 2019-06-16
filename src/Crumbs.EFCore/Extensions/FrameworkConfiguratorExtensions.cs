@@ -3,7 +3,6 @@ using Crumbs.Core.Event;
 using Crumbs.Core.Session;
 using Crumbs.Core.Snapshot;
 using Crumbs.EFCore.Session;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Crumbs.EFCore.Extensions
 {
@@ -12,21 +11,13 @@ namespace Crumbs.EFCore.Extensions
         public static FrameworkConfigurator UseSqlite(this FrameworkConfigurator configurator,
             string connectionString)
         {
-            configurator.AddConfigurationValue(DataStoreConnectionFactory.SqliteConnectionStringKey, connectionString);
-            configurator.AddConfigurationValue(DataStoreConnectionFactory.ProviderTypeKey, ProviderType.Sqlite);
-            RegisterMigrationAction(configurator);
-
-            return configurator;
+            return UseProvider(configurator, connectionString, ProviderType.Sqlite);
         }
 
         public static FrameworkConfigurator UseMySql(this FrameworkConfigurator configurator,
             string connectionString)
         {
-            configurator.AddConfigurationValue(DataStoreConnectionFactory.MySqlConnectionStringKey, connectionString);
-            configurator.AddConfigurationValue(DataStoreConnectionFactory.ProviderTypeKey, ProviderType.MySql);
-            RegisterMigrationAction(configurator);
-
-            return configurator;
+            return UseProvider(configurator, connectionString, ProviderType.MySql);
         }
 
         public static FrameworkConfigurator UseDefaultStores(this FrameworkConfigurator configurator)
@@ -42,10 +33,17 @@ namespace Crumbs.EFCore.Extensions
             return configurator;
         }
 
-        private static void RegisterMigrationAction(FrameworkConfigurator configurator)
+        private static FrameworkConfigurator UseProvider(this FrameworkConfigurator configurator, string connectionString, ProviderType providerType)
+        {
+            configurator.AddConfigurationValue(DataStoreConnectionFactory.EFCoreConnectionStringKey, connectionString);
+            configurator.AddConfigurationValue(DataStoreConnectionFactory.ProviderTypeKey, providerType);
+            return RegisterMigrationAction(configurator);
+        }
+
+        private static FrameworkConfigurator RegisterMigrationAction(this FrameworkConfigurator configurator)
         {
             // Todo: Rewrite to public async Task<T> InitilizeAction<T>(Func<T, Task> action)
-            configurator.RegisterInitializationAction(resolver =>
+            return configurator.RegisterInitializationAction(resolver =>
             {
                 var factory = resolver.Resolve<IFrameworkContextFactory>();
                 // Todo: Rewrite (need to make sure migration is done before run)

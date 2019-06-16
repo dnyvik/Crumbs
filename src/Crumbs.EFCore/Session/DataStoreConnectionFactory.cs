@@ -1,5 +1,4 @@
 ﻿using Crumbs.Core.Configuration;
-using Crumbs.Core.Exceptions;
 using Crumbs.Core.Extensions;
 using Crumbs.Core.Session;
 using Crumbs.EFCore.Extensions;
@@ -12,36 +11,20 @@ namespace Crumbs.EFCore.Session
 {
     public class DataStoreConnectionFactory : IDataStoreConnectionFactory, IFrameworkContextFactory
     {
-        public const string SqliteConnectionStringKey = nameof(SqliteConnectionStringKey);
-        public const string MySqlConnectionStringKey = nameof(MySqlConnectionStringKey);
+        public const string EFCoreConnectionStringKey = nameof(EFCoreConnectionStringKey);
         public const string ProviderTypeKey = nameof(ProviderTypeKey);
 
-        private ProviderType _providerType;
+        private readonly ProviderType _providerType;
+        private readonly string ConnectionString;
         private readonly ISessionManager _sessionManager;
-
-        // Todo: Get from config in providers
-        public static string ConnectionString;
 
         public DataStoreConnectionFactory(
             IFrameworkConfiguration configuration,
             ISessionManager sessionManager)
         {
             _providerType = configuration.GetValue<ProviderType>(ProviderTypeKey);
-            ConnectionString = GetConnectionString(_providerType, configuration);
+            ConnectionString = configuration.GetValue<string>(EFCoreConnectionStringKey);
             _sessionManager = sessionManager;
-        }
-
-        private static string GetConnectionString(ProviderType providerType, IFrameworkConfiguration configuration)
-        {
-            switch (providerType)
-            {
-                case ProviderType.Sqlite:
-                    return configuration.GetValue<string>(SqliteConnectionStringKey);
-                case ProviderType.MySql:
-                    return configuration.GetValue<string>(MySqlConnectionStringKey);
-            }
-
-            throw new FrameworkConfigurationException("Unknown provider.");
         }
 
         public async Task<IDataStoreConnection> Connect()
@@ -80,11 +63,8 @@ namespace Crumbs.EFCore.Session
                         optionsBuilder.UseMySql(scope.AsDbConnection()).Options;
                     context = new MySqlDbContext(mySqlOptions);
                     break;
-            }
-
-            if (context == null)
-            {
-                throw new Exception("Todo");
+                default:
+                    throw new NotImplementedException($"No provider exists for '{providerType}'.");
             }
 
             return scope != null ?
