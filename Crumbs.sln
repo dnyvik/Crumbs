@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crumbs.Serializers.Json", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crumbs.History", "src\Crumbs.History\Crumbs.History.csproj", "{0847FEBA-8E29-4187-A3B1-4DBEC2515992}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crumbs.EventualConsistency", "src\Crumbs.EventualConsistency\Crumbs.EventualConsistency.csproj", "{12591D19-A3C3-45CE-97CF-AEC2E79E433A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crumbs.EventualConsistency", "src\Crumbs.EventualConsistency\Crumbs.EventualConsistency.csproj", "{12591D19-A3C3-45CE-97CF-AEC2E79E433A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crumbs.EFCore", "src\Crumbs.EFCore\Crumbs.EFCore.csproj", "{F1F67D1F-6D6D-4CEC-802D-E0AB85717559}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crumbs.EFCore", "src\Crumbs.EFCore\Crumbs.EFCore.csproj", "{F1F67D1F-6D6D-4CEC-802D-E0AB85717559}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crumbs.DependencyInjection.ServiceCollection", "src\Crumbs.DependencyInjection.ServiceCollection\Crumbs.DependencyInjection.ServiceCollection.csproj", "{A0869DFB-EDB6-4EF5-99A4-62BC772FE486}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{F1F67D1F-6D6D-4CEC-802D-E0AB85717559}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1F67D1F-6D6D-4CEC-802D-E0AB85717559}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1F67D1F-6D6D-4CEC-802D-E0AB85717559}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0869DFB-EDB6-4EF5-99A4-62BC772FE486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0869DFB-EDB6-4EF5-99A4-62BC772FE486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0869DFB-EDB6-4EF5-99A4-62BC772FE486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0869DFB-EDB6-4EF5-99A4-62BC772FE486}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

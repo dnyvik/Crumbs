@@ -2,7 +2,7 @@
 using Crumbs.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Crumbs.EFCore
+namespace Crumbs.DependencyInjection.ServiceCollection
 {
     public class ServiceCollectionWrapper : IDependencyInjection
     {

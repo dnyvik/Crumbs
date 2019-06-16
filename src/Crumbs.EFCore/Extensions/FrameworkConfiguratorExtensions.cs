@@ -14,6 +14,7 @@ namespace Crumbs.EFCore.Extensions
         {
             configurator.AddConfigurationValue(DataStoreConnectionFactory.SqliteConnectionStringKey, connectionString);
             configurator.AddConfigurationValue(DataStoreConnectionFactory.ProviderTypeKey, ProviderType.Sqlite);
+            RegisterMigrationAction(configurator);
 
             return configurator;
         }
@@ -23,6 +24,7 @@ namespace Crumbs.EFCore.Extensions
         {
             configurator.AddConfigurationValue(DataStoreConnectionFactory.MySqlConnectionStringKey, connectionString);
             configurator.AddConfigurationValue(DataStoreConnectionFactory.ProviderTypeKey, ProviderType.MySql);
+            RegisterMigrationAction(configurator);
 
             return configurator;
         }
@@ -40,14 +42,8 @@ namespace Crumbs.EFCore.Extensions
             return configurator;
         }
 
-        // Todo: Seperate project?
-        public static FrameworkConfigurator UseServiceCollection(this FrameworkConfigurator configurator,
-            IServiceCollection serviceCollection)
+        private static void RegisterMigrationAction(FrameworkConfigurator configurator)
         {
-            var wrapper = new ServiceCollectionWrapper(serviceCollection);
-
-            configurator.SetDependencyFramework(wrapper);
-
             // Todo: Rewrite to public async Task<T> InitilizeAction<T>(Func<T, Task> action)
             configurator.RegisterInitializationAction(resolver =>
             {
@@ -56,8 +52,6 @@ namespace Crumbs.EFCore.Extensions
                 var context = factory.CreateContext().Result;
                 context.Migrate().Wait();
             });
-
-            return configurator;
         }
     }
 }
