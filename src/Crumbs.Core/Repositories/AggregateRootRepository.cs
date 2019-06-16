@@ -84,15 +84,16 @@ namespace Crumbs.Core.Repositories
 
         private async Task<T> LoadAggregate<T>(Guid id) where T : class, IAggregateRoot
         {
-            var snapshot = await _snapshotStore.Get(id);
-            var events = snapshot == null ? await _eventStore.Get(id, -1) : null;
+            var isSnapshotable = _snapshotStrategy.IsSnapshotable(typeof(T));
+
+            var snapshot = isSnapshotable ? await _snapshotStore.Get(id) : null;
+            var version = snapshot != null ? snapshot.Version : -1;
+            var events = await _eventStore.Get(id, version);
 
             if (snapshot == null && !events.Any())
             {
                 throw new AggregateNotFoundException(typeof(T), id);
             }
-
-            var isSnapshotable = _snapshotStrategy.IsSnapshotable(typeof(T));
 
             var aggregate = isSnapshotable || snapshot == null
                 ? AggregateFactory.Instance.CreateAggregate<T>()
@@ -103,7 +104,7 @@ namespace Crumbs.Core.Repositories
                 _snapshotRestoreUtility.Restore(aggregate, snapshot);
             }
 
-            if (events?.Any() ?? false)
+            if (events.Any())
             {
                 aggregate.LoadFromHistory(events);
             }
