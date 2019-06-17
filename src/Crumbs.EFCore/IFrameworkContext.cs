@@ -9,7 +9,7 @@ namespace Crumbs.EFCore
     public interface IFrameworkContext : IDisposable
     {
         DbSet<EventHandlerState> EventHandlerStates { get; set; }
-        DbSet<Event> Events { get; set; }
+        DbSet<Models.Event> Events { get; set; }
         DbSet<Models.Session> Sessions { get; set; }
         DbSet<Snapshot> Snapshots { get; set; }
 

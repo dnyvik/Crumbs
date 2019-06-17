@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Crumbs.EFCore
+namespace Crumbs.EFCore.Event
 {
     // Todo: Compiled query for all read methods
     public class EventStore : IEventStore
@@ -114,9 +114,9 @@ namespace Crumbs.EFCore
             }
         }
 
-        private Event CreateEntity(IDomainEvent e)
+        private Models.Event CreateEntity(IDomainEvent e)
         {
-            return new Event
+            return new Models.Event
             {
                 AggregateId = e.AggregateId,
                 AppliedByUserId = e.AppliedByUserId,
@@ -130,7 +130,7 @@ namespace Crumbs.EFCore
             };
         }
 
-        private IDomainEvent Deserialize(Event entity)
+        private IDomainEvent Deserialize(Models.Event entity)
         {
             var domainEvent = _eventSerializer.Deserialize(entity.Data, Type.GetType(entity.Type));
 

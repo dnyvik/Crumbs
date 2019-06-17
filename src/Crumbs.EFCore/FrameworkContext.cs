@@ -13,7 +13,7 @@ namespace Crumbs.EFCore
         public FrameworkContext(DbContextOptions<FrameworkContext> options)
             : base(options) { }
 
-        public DbSet<Event> Events { get; set; }
+        public DbSet<Models.Event> Events { get; set; }
         public DbSet<EventHandlerState> EventHandlerStates { get; set; }
         public DbSet<Snapshot> Snapshots { get; set; }
         public DbSet<Models.Session> Sessions { get; set; }
@@ -30,7 +30,7 @@ namespace Crumbs.EFCore
             modelBuilder.HasDefaultSchema("Framework");
             modelBuilder.SingularizeNames();
 
-            modelBuilder.Entity<Event>()
+            modelBuilder.Entity<Models.Event>()
                 .HasIndex(e => e.AggregateId);
         }
 

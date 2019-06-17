@@ -2,6 +2,7 @@
 using Crumbs.Core.Event;
 using Crumbs.Core.Session;
 using Crumbs.Core.Snapshot;
+using Crumbs.EFCore.Event;
 using Crumbs.EFCore.Session;
 
 namespace Crumbs.EFCore.Extensions
