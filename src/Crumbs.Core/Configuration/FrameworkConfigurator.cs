@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Crumbs.Core.Aggregate;
 using Crumbs.Core.Command;
+using Crumbs.Core.Configuration.SessionProfiles;
 using Crumbs.Core.DependencyInjection;
 using Crumbs.Core.Event;
 using Crumbs.Core.Exceptions;
@@ -19,7 +20,7 @@ namespace Crumbs.Core.Configuration
         private readonly Action<FrameworkConfigurationValues> _completeAction;
         private readonly FrameworkConfigurationValues _configuration;
         private IDependencyInjection _ioc;
-        private List<Action> _registerActions = new List<Action>();
+        private Dictionary<Type, Action> _registerActionForTypeMap = new Dictionary<Type, Action>();
         private List<Assembly> _assembliesToScan = new List<Assembly>();
         private List<ValueTuple<Type, Type>> _handlerToMessageMapping = new List<(Type, Type)>();
 
@@ -36,14 +37,14 @@ namespace Crumbs.Core.Configuration
             where TInterface : class
             where TImplementation : class, TInterface
         {
-            _registerActions.Add(() => _ioc.RegisterTransient<TInterface, TImplementation>());
+            RegisterActionForType(typeof(TInterface), () => _ioc.RegisterTransient<TInterface, TImplementation>());
             return this;
         }
 
         public FrameworkConfigurator RegisterSingelton<TInterface>(TInterface instance)
             where TInterface : class
         {
-            _registerActions.Add(() => _ioc.RegisterSingelton(instance));
+            RegisterActionForType(typeof(TInterface), () => _ioc.RegisterSingelton(instance));
             return this;
         }
 
@@ -51,7 +52,7 @@ namespace Crumbs.Core.Configuration
             where TInterface : class
             where TImplementation : class, TInterface
         {
-            _registerActions.Add(() => _ioc.RegisterSingelton<TInterface, TImplementation>());
+            RegisterActionForType(typeof(TInterface), () => _ioc.RegisterSingelton<TInterface, TImplementation>());
             return this;
         }
 
@@ -120,6 +121,16 @@ namespace Crumbs.Core.Configuration
             });
         }
 
+        private void RegisterActionForType(Type type, Action action)
+        {
+            if (_registerActionForTypeMap.ContainsKey(type))
+            {
+                throw new InvalidOperationException($"Type '{type}' already registered.");
+            }
+
+            _registerActionForTypeMap.Add(type, action);
+        }
+
         // For testing (remove when testing is done)
         public IResolver TestRun()
         {
@@ -164,8 +175,17 @@ namespace Crumbs.Core.Configuration
         {
             RegisterInternal();
             RegisterExternal();
+            RegisterDefaults();
             RegisterAggregates();
             RegisterMessageHandlers();
+        }
+
+        private void RegisterDefaults()
+        {
+            if (!_registerActionForTypeMap.ContainsKey(typeof(ISessionProfile)))
+            {
+                _ioc.RegisterSingelton<ISessionProfile, DefaultSessionProfile>();
+            }
         }
 
         private void RegisterAggregates()
@@ -188,7 +208,7 @@ namespace Crumbs.Core.Configuration
 
         private void RegisterExternal()
         {
-            foreach (var initializationAction in _registerActions)
+            foreach (var initializationAction in _registerActionForTypeMap.Values)
             {
                 initializationAction();
             }

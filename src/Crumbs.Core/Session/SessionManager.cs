@@ -6,9 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Crumbs.Core.Aggregate;
 using Crumbs.Core.Command;
+using Crumbs.Core.Configuration;
+using Crumbs.Core.Configuration.SessionProfiles;
 using Crumbs.Core.Event;
 using Crumbs.Core.Event.Framework;
 using Crumbs.Core.Exceptions;
+using Crumbs.Core.Extensions;
 using Crumbs.Core.Repositories;
 
 namespace Crumbs.Core.Session
@@ -19,11 +22,6 @@ namespace Crumbs.Core.Session
         private IDataStoreConnectionFactory _dataStoreConnectionFactory;
 
         // Todo: Config params
-        private const int MaxLoadAttempts = 30;
-        private const int MinBackoffIntervalInMilliseconds = 100;
-        private const int MaxBackoffIntervalInMilliseconds = 150;
-        private readonly TimeSpan LockTimeout = TimeSpan.FromMilliseconds(50); // Todo: Create profile concept (SLAs for commands)
-
         private const IsolationLevel TransactionIsolationLevel = IsolationLevel.ReadCommitted;
 
         private readonly Dictionary<Guid, AggregateDescriptor> _trackedAggregates;
@@ -32,19 +30,21 @@ namespace Crumbs.Core.Session
 
         private readonly AsyncLock _aggregateTrackerMutex;
         private readonly AsyncLock _databaseScopeMutex;
-
+        private readonly ISessionProfile _sessionProfile;
         private IAggregateRootRepository _repository;
         private ISessionTracker _sessionTracker;
         private bool _initialized;
 
         public SessionManager(
-            IEventPublisher eventPublisher)
+            IEventPublisher eventPublisher,
+            ISessionProfile sessionProfile) // Todo: Scope these to sessions instead? Could be a usefull overload.
         {
             _eventPublisher = eventPublisher;
             _trackedAggregates = new Dictionary<Guid, AggregateDescriptor>();
             _activeDatabaseScopes = new Dictionary<Guid, IDataStoreScope>();
             _aggregateTrackerMutex = new AsyncLock();
             _databaseScopeMutex = new AsyncLock();
+            _sessionProfile = sessionProfile;
         }
 
         public async Task<ISession> CreateSession(Guid sessionKey)
@@ -58,9 +58,9 @@ namespace Crumbs.Core.Session
 
         public async Task<T> LoadAggregate<T>(Guid id, CancellationToken ct) where T : class, IAggregateRoot
         {
-            for (int loadAttempts = 0; ; loadAttempts++)
+            for (var loadAttempts = 0; ; loadAttempts++)
             {
-                using (var asyncLock = await _aggregateTrackerMutex.LockAsync(LockTimeout, ct))
+                using (var asyncLock = await _aggregateTrackerMutex.LockAsync(_sessionProfile.LoadAttemptTimeout, ct))
                 {
                     var lockAcquired = asyncLock != null;
 
@@ -80,7 +80,7 @@ namespace Crumbs.Core.Session
 
                 ct.ThrowIfCancellationRequested();
 
-                if (loadAttempts > MaxLoadAttempts)
+                if (loadAttempts > _sessionProfile.MaxLoadAttempts)
                 {
                     break;
                 }
@@ -88,11 +88,25 @@ namespace Crumbs.Core.Session
                 await Task.Delay(Backoff);
             }
 
-            throw new MaxRetryLimitExceededException(MaxLoadAttempts, id, typeof(T));
+            throw new MaxRetryLimitExceededException(_sessionProfile.MaxLoadAttempts, id, typeof(T));
         }
 
-        private TimeSpan Backoff => TimeSpan.FromMilliseconds(Random.Value.Next(MinBackoffIntervalInMilliseconds,
-                    MaxBackoffIntervalInMilliseconds));
+        private TimeSpan Backoff
+        {
+            get
+            {
+                if (_sessionProfile.MinBackoffBetweenLoadAttempts < _sessionProfile.MaxBackoffBetweenLoadAttempts)
+                {
+                    var min = _sessionProfile.MinBackoffBetweenLoadAttempts.Milliseconds;
+                    var max = _sessionProfile.MaxBackoffBetweenLoadAttempts.Milliseconds;
+                    var backoff = Random.Value.Next(min, max);
+
+                    return TimeSpan.FromMilliseconds(backoff);
+                }
+
+                return TimeSpan.Zero;
+            }
+        }
 
         public async Task Commit(ISession session, ICommand command)
         {
