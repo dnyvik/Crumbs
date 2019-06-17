@@ -3,7 +3,9 @@ using Crumbs.Core.Event;
 using Crumbs.Core.Session;
 using Crumbs.Core.Snapshot;
 using Crumbs.EFCore.Event;
+using Crumbs.EFCore.EventualConsistency;
 using Crumbs.EFCore.Session;
+using Crumbs.EventualConsistency;
 
 namespace Crumbs.EFCore.Extensions
 {
@@ -26,6 +28,7 @@ namespace Crumbs.EFCore.Extensions
             configurator.RegisterTransientType<IEventStore, EventStore>();
             configurator.RegisterTransientType<ISessionStore, SessionStore>();
             configurator.RegisterTransientType<ISnapshotStore, SnapshotStore>(); // Todo: Select flavor
+            configurator.RegisterTransientType<IEventHandlerStateStore, EventHandlerStateStore>();
 
             configurator.RegisterSingelton<IDataStoreConnectionFactory, DataStoreConnectionFactory>();
             configurator.RegisterSingelton<IFrameworkContextFactory, DataStoreConnectionFactory>();
