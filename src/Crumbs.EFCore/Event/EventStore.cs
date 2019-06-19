@@ -1,5 +1,4 @@
 ﻿using Crumbs.Core.Event;
-using Crumbs.EFCore.Models;
 using Crumbs.EFCore.Session;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,6 +11,7 @@ namespace Crumbs.EFCore.Event
     // Todo: Compiled query for all read methods
     public class EventStore : IEventStore
     {
+        private const int MaximumRowsPerQueryLimit = 10000; // Todo: Make configurable or set per provider?
         private readonly IEventSerializer _eventSerializer;
         private readonly IFrameworkContextFactory _frameworkContextFactory;
 
@@ -46,9 +46,12 @@ namespace Crumbs.EFCore.Event
                     .Where(e => e.AggregateId == aggregateId)
                     .OrderBy(e => e.AggregateVersion)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync(); // Todo: CT
 
-                return eventDtos.Select(Deserialize).ToList().AsReadOnly();
+                return eventDtos
+                    .Select(Deserialize)
+                    .ToList()
+                    .AsReadOnly();
             }
         }
 
@@ -60,30 +63,75 @@ namespace Crumbs.EFCore.Event
                     .Where(e => e.AggregateId == aggregateId && e.AggregateVersion > fromVersion)
                     .OrderBy(e => e.AggregateVersion)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync(); // Todo: CT
+
+                return eventDtos
+                    .Select(Deserialize)
+                    .ToList()
+                    .AsReadOnly();
+            }
+        }
+
+        public async Task<IReadOnlyCollection<IDomainEvent>> Get(Guid aggregateId, DateTimeOffset fromDate)
+        {
+            using (var context = await _frameworkContextFactory.CreateContext())
+            {
+                var eventDtos = await context.Events
+                                    .Where(e => e.AggregateId == aggregateId 
+                                            && e.Timestamp > fromDate)
+                                    .OrderBy(e => e.AggregateVersion)
+                                    .ToListAsync();
 
                 return eventDtos.Select(Deserialize).ToList().AsReadOnly();
             }
         }
 
-        public Task<IReadOnlyCollection<IDomainEvent>> Get(Guid aggregateId, DateTimeOffset fromDate)
+        public async Task<IReadOnlyCollection<IDomainEvent>> Get(Guid aggregateId, int page, int itemsPerPage)
         {
-            throw new NotImplementedException();
+            if (itemsPerPage > MaximumRowsPerQueryLimit)
+            {
+                throw new ArgumentException($"Maximum rows per query limit exceeded. " +
+                    $"Items per page needs to be '{MaximumRowsPerQueryLimit}' or below.");
+            }
+
+            using (var context = await _frameworkContextFactory.CreateContext())
+            {
+                var itemsToSkip = (page - 1) * itemsPerPage;
+
+                var events = await context.Events
+                                         .Where(e => e.AggregateId == aggregateId)
+                                         .OrderByDescending(e => e.AggregateVersion)
+                                         .Skip(itemsToSkip)
+                                         .Take(itemsPerPage)
+                                         .AsNoTracking()
+                                         .ToListAsync();
+
+                return events.Select(Deserialize).ToList().AsReadOnly();
+            }
         }
 
-        public Task<IReadOnlyCollection<IDomainEvent>> Get(Guid aggregateId, int page, int itemsPerPage)
+        public async Task<IReadOnlyCollection<IDomainEvent>> GetAllAfter(long eventId, int batchSize)
         {
-            throw new NotImplementedException();
-        }
+            if (batchSize > MaximumRowsPerQueryLimit)
+            {
+                throw new ArgumentException($"Maximum rows per query limit exceeded. " +
+                    $"Batch size needs to be '{MaximumRowsPerQueryLimit}' or below.");
+            }
 
-        public Task<IReadOnlyCollection<IDomainEvent>> GetAll()
-        {
-            throw new NotImplementedException();
-        }
+            using (var context = await _frameworkContextFactory.CreateContext())
+            {
+                var events = await context.Events
+                    .AsNoTracking()
+                    .Where(e => e.EventId > eventId)
+                    .Take(batchSize)
+                    .OrderBy(e => e.EventId) // Todo: Need?
+                    .ToListAsync(); // Todo: CT
 
-        public Task<IReadOnlyCollection<IDomainEvent>> GetAllAfter(long eventId, int? batchSize = null)
-        {
-            throw new NotImplementedException();
+                return events
+                    .Select(Deserialize)
+                    .ToList()
+                    .AsReadOnly();
+            }
         }
 
         public async Task<IEnumerable<IDomainEvent>> Save(IEnumerable<IDomainEvent> events, Guid? sessionKey = null)
@@ -92,14 +140,12 @@ namespace Crumbs.EFCore.Event
             {
                 var domainEvents = events as IList<IDomainEvent> ?? events.ToList();
 
-                var eventData = domainEvents
-                    .Select(e =>
-                            new
-                            {
-                                DomainEvent = e,
-                                Entity = CreateEntity(e)
-                            })
-                    .ToList();
+                var eventData = domainEvents.Select(e =>
+                                new
+                                {
+                                    DomainEvent = e,
+                                    Entity = CreateEntity(e)
+                                });
 
                 context.Events.AddRange(eventData.Select(x => x.Entity));
                 await context.SaveChangesAsync(); // Todo: CT
