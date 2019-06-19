@@ -46,13 +46,14 @@ namespace Crumbs.EFCore.Extensions
 
         private static FrameworkConfigurator RegisterMigrationAction(this FrameworkConfigurator configurator)
         {
-            // Todo: Rewrite to public async Task<T> InitilizeAction<T>(Func<T, Task> action)
-            return configurator.RegisterInitializationAction(resolver =>
+            return configurator.RegisterInitializationAction(async resolver =>
             {
                 var factory = resolver.Resolve<IFrameworkContextFactory>();
-                // Todo: Rewrite (need to make sure migration is done before run)
-                var context = factory.CreateContext().Result;
-                context.Migrate().Wait();
+
+                using (var context = await factory.CreateContext())
+                {
+                    await context.Migrate();
+                }
             });
         }
     }

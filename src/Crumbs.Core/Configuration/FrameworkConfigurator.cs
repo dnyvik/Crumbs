@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Crumbs.Core.Aggregate;
 using Crumbs.Core.Command;
 using Crumbs.Core.Configuration.SessionProfiles;
@@ -23,9 +24,7 @@ namespace Crumbs.Core.Configuration
         private Dictionary<Type, Action> _registerActionForTypeMap = new Dictionary<Type, Action>();
         private List<Assembly> _assembliesToScan = new List<Assembly>();
         private List<ValueTuple<Type, Type>> _handlerToMessageMapping = new List<(Type, Type)>();
-
-        // Todo: To Tasks
-        private List<Action<IResolver>> _initializationActions = new List<Action<IResolver>>();
+        private List<Func<IResolver, Task>> _initializationActions = new List<Func<IResolver, Task>>();
 
         internal FrameworkConfigurator(Action<FrameworkConfigurationValues> completeAction)
         {
@@ -74,7 +73,7 @@ namespace Crumbs.Core.Configuration
             return this;
         }
 
-        public FrameworkConfigurator RegisterInitializationAction(Action<IResolver> action)
+        public FrameworkConfigurator RegisterInitializationAction(Func<IResolver, Task> action)
         {
             _initializationActions.Add(action);
             return this;
@@ -93,32 +92,25 @@ namespace Crumbs.Core.Configuration
             return this;
         }
 
-        public void Run()
+        public async Task Run()
         {
             ScanForHandlersAndMessages();
             Validate();
             RegisterDependencies();
-            RegisterInternalInitializationActions();
-            RunInitializeActions();
+            RunInternalInitializeActions();
+            await RunExternalInitializeActions();
 
             _completeAction(_configuration);
         }
 
-        private void RegisterInternalInitializationActions()
+        private void RunInternalInitializeActions()
         {
-            RegisterInitializationAction((resolver) =>
-            {
-                var connectionFactory = resolver.Resolve<IDataStoreConnectionFactory>();
-                var repository = resolver.Resolve<IAggregateRootRepository>();
-                var sessionTracker = resolver.Resolve<ISessionTracker>();
-                _ioc.Resolve<ISessionManager>().Initialize(connectionFactory, repository, sessionTracker);
-            });
+            var connectionFactory = _ioc.Resolve<IDataStoreConnectionFactory>();
+            var repository = _ioc.Resolve<IAggregateRootRepository>();
+            var sessionTracker = _ioc.Resolve<ISessionTracker>();
+            _ioc.Resolve<ISessionManager>().Initialize(connectionFactory, repository, sessionTracker);
 
-            RegisterInitializationAction((resolver) =>
-            {
-                // Register in ioc instead and inject?
-                AggregateFactory.Initialize(resolver);
-            });
+            AggregateFactory.Initialize(_ioc);
         }
 
         private void RegisterActionForType(Type type, Action action)
@@ -132,17 +124,17 @@ namespace Crumbs.Core.Configuration
         }
 
         // For testing (remove when testing is done)
-        public IResolver TestRun()
+        public async Task<IResolver> TestRun()
         {
-            Run();
+            await Run();
             return _ioc;
         }
 
-        private void RunInitializeActions()
+        private async Task RunExternalInitializeActions()
         {
             foreach (var action in _initializationActions)
             {
-                action(_ioc);
+                await action(_ioc);
             }
         }
 
