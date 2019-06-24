@@ -6,8 +6,8 @@ namespace Crumbs.EventualConsistency
 {
     public interface IEventHandlerStateStore
     {
-        Task<StateContainer<T>> Get<T>(Guid stateId) where T : IEventHandlerState;
-        Task Save<T>(StateContainer<T> stateContainer) where T : IEventHandlerState;
+        Task<IStateContainer<T>> Get<T>(Guid stateId) where T : IEventHandlerState;
+        Task Save<T>(IStateContainer<T> stateContainer) where T : IEventHandlerState;
         Task Delete(Guid stateId);
     }
 }

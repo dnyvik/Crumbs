@@ -19,7 +19,7 @@ namespace Crumbs.EventualConsistency
         private readonly IEventStore _eventStore;
 
         private IDisposable _eventStreamSubscription;
-        private StateContainer<T> _stateContainer;
+        private IStateContainer<T> _stateContainer;
 
         private readonly Dictionary<Type, Action<IDomainEvent>> _handlerMap
             = new Dictionary<Type, Action<IDomainEvent>>();

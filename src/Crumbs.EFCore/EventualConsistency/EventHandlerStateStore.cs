@@ -4,6 +4,7 @@ using Crumbs.EFCore.Session;
 using Crumbs.EventualConsistency;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace Crumbs.EFCore.EventualConsistency
             }
         }
 
-        public async Task<StateContainer<T>> Get<T>(Guid stateId) where T : IEventHandlerState
+        public async Task<IStateContainer<T>> Get<T>(Guid stateId) where T : IEventHandlerState
         {
             using (var context = await _frameworkContextFactory.CreateContext())
             {
@@ -62,7 +63,7 @@ namespace Crumbs.EFCore.EventualConsistency
         }
 
         // Todo: Clean up
-        public async Task Save<T>(StateContainer<T> stateContainer) where T : IEventHandlerState
+        public async Task Save<T>(IStateContainer<T> stateContainer) where T : IEventHandlerState
         {
             using (var context = await _frameworkContextFactory.CreateContext())
             {
