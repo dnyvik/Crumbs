@@ -10,7 +10,8 @@ namespace Crumbs.Core.Configuration
     {
         public static IEnumerable<Type> GetAllTypes(List<Assembly> assemblies)
         {
-            return assemblies.SelectMany(a => a.GetTypes()).Where(t => t.IsSubclassOf(typeof(AggregateRoot)));
+            return assemblies.SelectMany(a => a.GetTypes())
+                .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(AggregateRoot)));
         }
     }
 }
