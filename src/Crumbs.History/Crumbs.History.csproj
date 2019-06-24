@@ -5,6 +5,13 @@
     <LangVersion>7.1</LangVersion>
     <Authors>Daniel Nyvik</Authors>
     <RepositoryUrl>https://github.com/dnyvik/Crumbs</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>DDD and a paranoid take on ES.</Description>
+    <VersionPrefix/>
+    <VersionSuffix>alpha</VersionSuffix>
+    <PackageVersion />
+    <AssemblyVersion />
+    <FileVersion />
   </PropertyGroup>
 
   <ItemGroup>
