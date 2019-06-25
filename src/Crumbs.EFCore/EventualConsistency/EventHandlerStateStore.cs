@@ -1,10 +1,8 @@
 ﻿using Crumbs.Core.Event.EventualConsistency;
 using Crumbs.EFCore.Models;
 using Crumbs.EFCore.Session;
-using Crumbs.EventualConsistency;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 

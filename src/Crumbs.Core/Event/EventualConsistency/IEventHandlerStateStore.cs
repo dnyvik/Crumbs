@@ -1,8 +1,7 @@
-﻿using Crumbs.Core.Event.EventualConsistency;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
-namespace Crumbs.EventualConsistency
+namespace Crumbs.Core.Event.EventualConsistency
 {
     public interface IEventHandlerStateStore
     {

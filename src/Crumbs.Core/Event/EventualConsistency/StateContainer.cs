@@ -1,7 +1,6 @@
-﻿using Crumbs.Core.Event.EventualConsistency;
-using System;
+﻿using System;
 
-namespace Crumbs.EventualConsistency
+namespace Crumbs.Core.Event.EventualConsistency
 {
     public class StateContainer<T> : IStateContainer<T> where T : IEventHandlerState
     {

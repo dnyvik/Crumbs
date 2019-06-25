@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Crumbs.Core\Crumbs.Core.csproj" />
-    <ProjectReference Include="..\Crumbs.EventualConsistency\Crumbs.EventualConsistency.csproj" />
   </ItemGroup>
 
   <ItemGroup>

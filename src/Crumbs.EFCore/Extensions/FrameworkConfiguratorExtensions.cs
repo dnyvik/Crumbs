@@ -1,11 +1,11 @@
 ﻿using Crumbs.Core.Configuration;
 using Crumbs.Core.Event;
+using Crumbs.Core.Event.EventualConsistency;
 using Crumbs.Core.Session;
 using Crumbs.Core.Snapshot;
 using Crumbs.EFCore.Event;
 using Crumbs.EFCore.EventualConsistency;
 using Crumbs.EFCore.Session;
-using Crumbs.EventualConsistency;
 
 namespace Crumbs.EFCore.Extensions
 {
