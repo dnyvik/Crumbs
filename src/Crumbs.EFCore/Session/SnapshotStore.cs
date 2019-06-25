@@ -93,6 +93,7 @@ namespace Crumbs.EFCore.Session
 
         private Snapshot Deserialize(Models.Snapshot dto)
         {
+            // Todo: Type cache?
             var snapshot = _snapshotSerializer.Deserialize(dto.Content, Type.GetType(dto.Type));
             snapshot.AggregateId = dto.AggregateId;
             snapshot.Version = dto.Version;

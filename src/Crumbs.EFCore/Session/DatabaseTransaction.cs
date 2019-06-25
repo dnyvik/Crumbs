@@ -2,6 +2,7 @@
 
 namespace Crumbs.EFCore.Session
 {
+    // Todo: Dispose db context from here?
     public class DatabaseTransactionWrapper : IDataStoreTransaction
     {
         public DbTransaction Transaction { get; }

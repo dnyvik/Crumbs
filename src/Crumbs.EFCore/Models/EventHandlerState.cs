@@ -8,7 +8,7 @@ namespace Crumbs.EFCore.Models
     {
         [Key]
         public Guid Id { get; set; }
-        public long ProcessedEventId { get; set; } //Long?
+        public long ProcessedEventId { get; set; }
         public DateTimeOffset LastUpdated { get; set; }
         public StatefulHandlerStatus Status { get; set; }
 

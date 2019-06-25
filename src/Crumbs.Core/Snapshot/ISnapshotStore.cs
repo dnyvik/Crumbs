@@ -11,6 +11,7 @@ namespace Crumbs.Core.Snapshot
         Task Save(Snapshot snapshot, Guid? sessionKey);
         Task Delete(Guid aggregateId);
         Task DeleteAll();
-        
+
+        // Todo: Rebuild snapshots? Get all aggregate Ids or get all snapshot ids and rebuild.
     }
 }
