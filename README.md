@@ -5,8 +5,8 @@
 
 WIP
 
-Use current config for testing (returns a resolver). Expect major changes!
-```
+For service/console:
+```csharp
  CrumbsBootstrapper.Configure()
         .UseServiceCollection(servieCollection)
         .UseInproccessMediation()
@@ -17,3 +17,16 @@ Use current config for testing (returns a resolver). Expect major changes!
         .UseDefaultStores()
         .TestRun();
 ```
+For ASP.NET Core:
+```csharp
+ servieCollection.AddCrumbs((options) =>
+            {
+                options.UseInproccessMediation()
+                .UseSnapshotAllStrategy()
+                .UseJsonSerializers()
+                .UseHandlersFrom(Assembly.GetExecutingAssembly())
+                .UseSqlite("Data Source=YourNameHere.db")
+                .UseDefaultStores();
+            });
+```
+
