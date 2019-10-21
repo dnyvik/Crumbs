@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Crumbs.Core.Command;
@@ -36,8 +37,9 @@ namespace Crumbs.Core.Mediation
             {
                 if (handlerTypes.Count != 1)
                 {
-                    throw new InvalidOperationException($"There are more than one handler for command '{commandType}'." +
-                        $" Framework only supports a single handler per command type at any given time.");
+                    throw new InvalidOperationException($"There are more than one handler for command '{commandType}'. " +
+                        $"Handlers found: {string.Join(',', handlerTypes.Select(x => x.FullName))}. "  +
+                        $"Framework only supports a single handler per command type at any given time.");
                 }
 
                 var handler = _resolver.Resolve(handlerTypes[0]) as ICommandHandler<T>;
