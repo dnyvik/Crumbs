@@ -17,9 +17,9 @@ namespace Crumbs.Core.Mediation
         private readonly List<Action<IDomainEvent>> _relays
             = new List<Action<IDomainEvent>>();
 
-        private readonly IResolver _resolver;
+        private IResolver _resolver;
 
-        public InProcessBus(IResolver resolver)
+        public void Initialize(IResolver resolver)
         {
             _resolver = resolver;
         }

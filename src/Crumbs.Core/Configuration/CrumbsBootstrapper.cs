@@ -1,21 +1,25 @@
 using System;
+using System.Threading.Tasks;
 
 namespace Crumbs.Core.Configuration
 {
     public static class CrumbsBootstrapper
     {
-        private static bool _initialized;
-
+        private static FrameworkConfigurator _configurator;
         public static FrameworkConfigurator Configure()
         {
-            if (_initialized)
-                throw new InvalidOperationException("Framework has already been initialized.");
-
-            return new FrameworkConfigurator(configuration =>
+            if (_configurator != null)
             {
+                return _configurator;
+            }
+
+            _configurator = new FrameworkConfigurator(configuration =>
+            {
+                _configurator = null; //Todo: Dispose
                 // Todo: Do actual init logic from here?
-                _initialized = true;
             });
+
+            return _configurator;
         }
     }
 }

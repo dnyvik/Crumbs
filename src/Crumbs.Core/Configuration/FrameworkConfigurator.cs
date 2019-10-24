@@ -20,11 +20,12 @@ namespace Crumbs.Core.Configuration
     {
         private readonly Action<FrameworkConfigurationValues> _completeAction;
         private readonly FrameworkConfigurationValues _configuration;
-        private IDependencyInjection _ioc;
+        private IDependencyInjection _ioc; // Todo: Dependency for register and for resolver?
         private Dictionary<Type, Action> _registerActionForTypeMap = new Dictionary<Type, Action>();
         private List<Assembly> _assembliesToScan = new List<Assembly>();
         private List<ValueTuple<Type, Type>> _handlerToMessageMapping = new List<(Type, Type)>();
         private List<Func<IResolver, Task>> _initializationActions = new List<Func<IResolver, Task>>();
+        private bool _initialized;
 
         internal FrameworkConfigurator(Action<FrameworkConfigurationValues> completeAction)
         {
@@ -82,25 +83,55 @@ namespace Crumbs.Core.Configuration
         //Mediation
         public FrameworkConfigurator UseInproccessMediation()
         {
-            var bus = new InProcessBus(_ioc);
+            var bus = new InProcessBus();
 
             _ioc.RegisterSingelton<ICommandSender>(bus);
             _ioc.RegisterSingelton<IEventPublisher>(bus);
             _ioc.RegisterSingelton<IMessageHandlerRegistry>(bus);
             _ioc.RegisterSingelton<IEventRelay>(bus);
 
+            RegisterInitializationAction(async resolver => bus.Initialize(resolver));
+
             return this;
         }
 
         public async Task Run()
         {
-            ScanForHandlersAndMessages();
-            Validate();
             RegisterDependencies();
+            await Initialize();
+        }
+
+        public async Task Initialize()
+        {
+            if (_initialized)
+            {
+                throw new FrameworkConfigurationException("Crumbs can only be initialized once.");
+            }
+
+            Validate();
             RunInternalInitializeActions();
             await RunExternalInitializeActions();
-
+            InitializeMessageHandler();
             _completeAction(_configuration);
+
+            _initialized = true;
+        }
+
+        private void InitializeMessageHandler()
+        {
+            var handlerMapping = new List<(Type, Type)>();
+
+            var handlerGroupings = _handlerToMessageMapping.GroupBy(v => v.Item2);
+
+            var registry = _ioc.Resolve<IMessageHandlerRegistry>();
+
+            foreach (var handlerGrouping in handlerGroupings)
+            {
+                foreach (var (messageType, handlerType) in handlerGrouping)
+                {
+                    registry.RegisterHandler(messageType, handlerType);
+                }
+            }
         }
 
         private void RunInternalInitializeActions()
@@ -163,8 +194,9 @@ namespace Crumbs.Core.Configuration
             }
         }
 
-        private void RegisterDependencies()
+        public void RegisterDependencies()
         {
+            ScanForHandlersAndMessages();
             RegisterInternal();
             RegisterExternal();
             RegisterDefaults();
@@ -191,7 +223,7 @@ namespace Crumbs.Core.Configuration
         private void RegisterInternal()
         {
             _ioc.RegisterSingelton<IFrameworkConfiguration>(_configuration);
-            _ioc.RegisterSingelton<IResolver>(_ioc);
+            //_ioc.RegisterSingelton<IResolver>(_ioc);
             _ioc.RegisterSingelton<IAggregateRootRepository, AggregateRootRepository>();
             _ioc.RegisterSingelton<ISessionTracker, SessionTracker>();
             _ioc.RegisterSingelton<ISnapshotRestoreUtility, SnapshotRestoreUtility>();
@@ -208,27 +240,11 @@ namespace Crumbs.Core.Configuration
 
         private void RegisterMessageHandlers()
         {
-            // Todo: cleanup
-
-            var handlerMapping = new List<(Type, Type)>();
-
             var handlerGroupings = _handlerToMessageMapping.GroupBy(v => v.Item2);
 
-            // We need to register handlers before we build resolver
             foreach (var handlerGrouping in handlerGroupings)
             {
                 _ioc.RegisterTransient(handlerGrouping.Key);
-            }
-
-            // First call to resolver might build it. Dependencies used by framework needs to be registered before this.
-            var registry = _ioc.Resolve<IMessageHandlerRegistry>();
-
-            foreach (var handlerGrouping in handlerGroupings)
-            {
-                foreach (var (messageType, handlerType) in handlerGrouping)
-                {
-                    registry.RegisterHandler(messageType, handlerType);
-                }
             }
         }
     }
