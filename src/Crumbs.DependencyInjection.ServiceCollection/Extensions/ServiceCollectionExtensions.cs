@@ -18,5 +18,20 @@ namespace Crumbs.DependencyInjection.ServiceCollection.Extensions
 
             return services;
         }
+
+        // Todo: Split libs for console and ASP.NET core
+        public static IServiceCollection AddCrumbsAspNetCore(
+            this IServiceCollection services,
+            Action<FrameworkConfigurator> configuratorAction)
+        {
+            var configurator = CrumbsBootstrapper.Configure()
+                .UseServiceCollectionRegistryWrapper(services);
+
+            configuratorAction(configurator);
+
+            configurator.RegisterDependencies();
+
+            return services;
+        }
     }
 }

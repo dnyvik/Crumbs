@@ -11,9 +11,15 @@ namespace Crumbs.DependencyInjection.ServiceCollection.Extensions
         {
             var wrapper = new ServiceCollectionWrapper(services);
 
-            configurator.SetDependencyFramework(wrapper);
+            return configurator.SetDependencyFramework(wrapper);
+        }
 
-            return configurator;
+        internal static FrameworkConfigurator UseServiceCollectionRegistryWrapper(
+            this FrameworkConfigurator configurator,
+            IServiceCollection services)
+        {
+            var wrapper = new ServiceCollectionRegistryWrapper(services);
+            return configurator.SetDependencyFramework(wrapper);
         }
     }
 }

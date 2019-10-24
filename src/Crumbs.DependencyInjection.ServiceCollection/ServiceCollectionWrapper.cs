@@ -45,21 +45,21 @@ namespace Crumbs.DependencyInjection.ServiceCollection
             _services.AddTransient<TInterface, TImplementation>();
         }
 
-        public T Resolve<T>() where T : class
-        {
-            return Provider.GetRequiredService<T>();
-        }
-
-        public object Resolve(Type type)
-        {
-            return Provider.GetRequiredService(type);
-        }
-
         public void RegisterSingelton<TInterface, TImplementation>()
             where TInterface : class
             where TImplementation : class, TInterface
         {
             _services.AddSingleton<TInterface, TImplementation>();
+        }
+
+        public virtual T Resolve<T>() where T : class
+        {
+            return Provider.GetRequiredService<T>();
+        }
+
+        public virtual object Resolve(Type type)
+        {
+            return Provider.GetRequiredService(type);
         }
     }
 }
