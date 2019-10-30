@@ -43,6 +43,7 @@ namespace Crumbs.EFCore
 
         public async Task Migrate()
         {
+            await Database.EnsureCreatedAsync();
             await Database.MigrateAsync();
         }
 
