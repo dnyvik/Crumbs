@@ -13,7 +13,7 @@ namespace Crumbs.DependencyInjection.ServiceCollection.Extensions
             var configuration = CrumbsBootstrapper.Configure()
                 .SetDependencyFramework(wrapper);
 
-            configuration.Initialize().Wait(3000);
+            configuration.Initialize();
 
             return applicationBuilder;
         }
