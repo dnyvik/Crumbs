@@ -16,7 +16,8 @@ namespace Crumbs.EFCore
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
         Task<System.Data.Common.DbConnection> OpenDbConnection();
-        Task Migrate();
+        Task MigrateAsync();
+        void Migrate();
         IFrameworkContext UseTransaction(System.Data.Common.DbTransaction transaction);
     }
 }

@@ -14,7 +14,7 @@ namespace Crumbs.DependencyInjection.ServiceCollection.Extensions
                 .UseServiceCollection(services);
 
             configuratorAction(configurator);
-            configurator.Run();
+            configurator.Run().Wait(TimeSpan.FromMinutes(1));
 
             return services;
         }

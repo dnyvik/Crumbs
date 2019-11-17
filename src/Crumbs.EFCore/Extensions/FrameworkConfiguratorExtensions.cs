@@ -52,7 +52,7 @@ namespace Crumbs.EFCore.Extensions
 
                 using (var context = await factory.CreateContext())
                 {
-                    await context.Migrate();
+                    context.Migrate();
                 }
             });
         }

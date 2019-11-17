@@ -41,10 +41,14 @@ namespace Crumbs.EFCore
             return connection;
         }
 
-        public async Task Migrate()
+        public async Task MigrateAsync()
         {
-            await Database.EnsureCreatedAsync();
             await Database.MigrateAsync();
+        }
+
+        public void Migrate()
+        {
+            Database.Migrate();
         }
 
         public IFrameworkContext UseTransaction(DbTransaction transaction)

@@ -1,5 +1,6 @@
 ﻿using Crumbs.Core.Configuration;
 using Microsoft.AspNetCore.Builder;
+using System;
 
 namespace Crumbs.DependencyInjection.ServiceCollection.Extensions
 {
@@ -13,7 +14,7 @@ namespace Crumbs.DependencyInjection.ServiceCollection.Extensions
             var configuration = CrumbsBootstrapper.Configure()
                 .SetDependencyFramework(wrapper);
 
-            configuration.Initialize();
+            configuration.Initialize().Wait(TimeSpan.FromMinutes(1));
 
             return applicationBuilder;
         }
