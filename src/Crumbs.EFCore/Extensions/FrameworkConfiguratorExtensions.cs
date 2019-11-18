@@ -6,6 +6,8 @@ using Crumbs.Core.Snapshot;
 using Crumbs.EFCore.Event;
 using Crumbs.EFCore.EventualConsistency;
 using Crumbs.EFCore.Session;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Crumbs.EFCore.Extensions
 {
@@ -33,6 +35,24 @@ namespace Crumbs.EFCore.Extensions
             configurator.RegisterSingelton<IDataStoreConnectionFactory, DataStoreConnectionFactory>();
             configurator.RegisterSingelton<IFrameworkContextFactory, DataStoreConnectionFactory>();
             // Todo: EventHandler state store
+
+            return configurator;
+        }
+
+        public static FrameworkConfigurator UseScopedContext<TContextInterface>(
+            this FrameworkConfigurator configurator,
+            Func<DbContextOptions<SessionScopedContext>, TContextInterface> factoryMethod)
+            where TContextInterface : IScopedContex
+        {
+            configurator.RegisterSingelton<
+                ISessionScopedContextFactory<TContextInterface>,
+                SessionScopedContextFactory<TContextInterface>>();
+
+            configurator.RegisterInitializationAction(async resolver =>
+            {
+                var factory = resolver.Resolve<ISessionScopedContextFactory<TContextInterface>>();
+                factory.Initialize(factoryMethod);
+            });
 
             return configurator;
         }

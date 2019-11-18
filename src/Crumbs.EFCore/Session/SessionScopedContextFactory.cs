@@ -2,54 +2,52 @@
 using Crumbs.Core.Extensions;
 using Crumbs.Core.Session;
 using Crumbs.EFCore.Extensions;
-using Crumbs.EFCore.ProviderContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
 namespace Crumbs.EFCore.Session
 {
-    public class DataStoreConnectionFactory : IDataStoreConnectionFactory, IFrameworkContextFactory
+    public class SessionScopedContextFactory<TContextInterface> :
+        ISessionScopedContextFactory<TContextInterface>
+        where TContextInterface : IScopedContex
     {
         public const string EFCoreConnectionStringKey = nameof(EFCoreConnectionStringKey);
         public const string ProviderTypeKey = nameof(ProviderTypeKey);
 
+        private readonly ISessionManager _sessionManager;
         private readonly ProviderType _providerType;
         private readonly string _connectionString;
-        private readonly ISessionManager _sessionManager;
 
-        public DataStoreConnectionFactory(
-            IFrameworkConfiguration configuration,
-            ISessionManager sessionManager)
+        private Func<DbContextOptions<SessionScopedContext>, TContextInterface> _factoryMethod;
+
+        public SessionScopedContextFactory(
+            ISessionManager sessionManager,
+            IFrameworkConfiguration configuration)
         {
+            _sessionManager = sessionManager;
             _providerType = configuration.GetValue<ProviderType>(ProviderTypeKey);
             _connectionString = configuration.GetValue<string>(EFCoreConnectionStringKey);
-            _sessionManager = sessionManager;
         }
 
-        public async Task<IDataStoreConnection> Connect()
+        public void Initialize(Func<DbContextOptions<SessionScopedContext>, TContextInterface> factoryMethod)
         {
-            var connectionWrapper = new DatabaseConnectionWrapper(await CreateContext());
-            await connectionWrapper.OpenConnection();
-
-            return connectionWrapper;
+            _factoryMethod = factoryMethod;
         }
 
-
-        // Todo: Use scoped contex factory
-        public async Task<IFrameworkContext> CreateContext(Guid? session = null)
+        public async Task<TContextInterface> CreateContext<TInterface>(Guid? session = null)
         {
-            var scope = session.HasValue ? 
+            var scope = session.HasValue ?
                 await _sessionManager.GetScopeForSession(session.Value) :
                 null;
 
             return CreateContext(_providerType, scope);
         }
 
-        private IFrameworkContext CreateContext(ProviderType providerType, IDataStoreScope scope)
+        private TContextInterface CreateContext(ProviderType providerType, IDataStoreScope scope)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<FrameworkContext>();
-            IFrameworkContext context = null;
+            var optionsBuilder = new DbContextOptionsBuilder<SessionScopedContext>();
+            TContextInterface context;
 
             switch (providerType)
             {
@@ -57,21 +55,26 @@ namespace Crumbs.EFCore.Session
                     var sqliteOptions = scope == null ?
                         optionsBuilder.UseSqlite(_connectionString).Options :
                         optionsBuilder.UseSqlite(scope.AsDbConnection()).Options;
-                    context = new SqliteDbContext(sqliteOptions);
+                    context = _factoryMethod(sqliteOptions);
                     break;
                 case ProviderType.MySql:
                     var mySqlOptions = scope == null ?
                         optionsBuilder.UseMySql(_connectionString).Options :
                         optionsBuilder.UseMySql(scope.AsDbConnection()).Options;
-                    context = new MySqlDbContext(mySqlOptions);
+                    context = _factoryMethod(mySqlOptions);
                     break;
                 default:
                     throw new NotImplementedException($"No provider exists for '{providerType}'.");
             }
 
-            return scope != null ?
-                context.UseTransaction(scope.AsTransaction()) :
-                context;
+            if (scope != null)
+            {
+                context.ScopeTo(scope);
+                return context;
+            }
+
+            return default;
         }
     }
 }
+
