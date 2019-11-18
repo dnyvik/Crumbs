@@ -7,6 +7,6 @@ namespace Crumbs.EFCore.Session
     public interface ISessionScopedContextFactory<TContextInterface> where TContextInterface : IScopedContex
     {
         Task<TContextInterface> CreateContext<TInterface>(Guid? session = null);
-        void Initialize(Func<DbContextOptions<SessionScopedContext>, TContextInterface> factoryMethod);
+        void Initialize(Func<DbContextOptions, TContextInterface> factoryMethod);
     }
 }

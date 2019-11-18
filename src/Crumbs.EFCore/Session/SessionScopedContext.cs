@@ -6,7 +6,7 @@ namespace Crumbs.EFCore.Session
 {
     public abstract class SessionScopedContext : DbContext, IScopedContex
     {
-        public SessionScopedContext(DbContextOptions<SessionScopedContext> options)
+        public SessionScopedContext(DbContextOptions options)
          : base(options) { }
 
         public void ScopeTo(IDataStoreScope scope)

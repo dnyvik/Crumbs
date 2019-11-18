@@ -41,7 +41,7 @@ namespace Crumbs.EFCore.Extensions
 
         public static FrameworkConfigurator UseScopedContext<TContextInterface>(
             this FrameworkConfigurator configurator,
-            Func<DbContextOptions<SessionScopedContext>, TContextInterface> factoryMethod)
+            Func<DbContextOptions, TContextInterface> factoryMethod)
             where TContextInterface : IScopedContex
         {
             configurator.RegisterSingelton<

@@ -30,7 +30,7 @@ namespace Crumbs.EFCore.Session
             _connectionString = configuration.GetValue<string>(EFCoreConnectionStringKey);
         }
 
-        public void Initialize(Func<DbContextOptions<SessionScopedContext>, TContextInterface> factoryMethod)
+        public void Initialize(Func<DbContextOptions, TContextInterface> factoryMethod)
         {
             _factoryMethod = factoryMethod;
         }
