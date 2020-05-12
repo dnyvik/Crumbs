@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Crumbs.History
 {
     // Todo: Configurator extension
-    // Todo: Condier using async streams in the future
+    // Todo: Consider using async streams in the future
     public class HistoryService : IHistoryService
     {
         private static readonly HashSet<string> IgnoredProperties;

@@ -14,5 +14,10 @@ namespace Crumbs.Core.Exceptions
         {
             return new DomainException(message);
         }
+
+        public static DomainException Warning(string message)
+        {
+            return new DomainException(message);
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Crumbs.Core.Event;
 using Crumbs.Core.Event.EventualConsistency;
 using Crumbs.Core.Event.Framework;
+using Crumbs.EventualConsistency.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,7 @@ using System.Threading.Tasks;
 
 namespace Crumbs.EventualConsistency
 {
-    // Todo: Rename
-    public abstract class HistoricalDomainEventHandler<T> : IStatefulEventHandler<T>, IDisposable where T : IEventHandlerState
+    public abstract class StatefulEventuallyConsistentEventHandler<T> : IStatefulEventHandler<T>, IDisposable where T : IEventHandlerState
     {
         private readonly IEventStreamer _eventStreamer;
         private readonly IEventHandlerStateStore _eventHandlerStateStore;
@@ -37,7 +37,7 @@ namespace Crumbs.EventualConsistency
         private bool _pollerIsRunning;
         private readonly TimeSpan _historicalPollingInterval = TimeSpan.FromSeconds(20); // Todo: Config
 
-        protected HistoricalDomainEventHandler(IEventStore eventStore,
+        protected StatefulEventuallyConsistentEventHandler(IEventStore eventStore,
                                                IEventStreamer eventStreamer,
                                                IEventHandlerStateStore eventHandlerStateStore)
         {

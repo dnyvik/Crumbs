@@ -55,6 +55,28 @@ namespace Crumbs.EFCore.Event
             }
         }
 
+        // Todo: Implement for alle getters
+        public async Task<IReadOnlyCollection<T>> Get<T>(Guid aggregateId) where T : IDomainEvent
+        {
+            using (var context = await _frameworkContextFactory.CreateContext())
+            {
+                var eventType = typeof(T).AssemblyQualifiedName;
+
+                var eventDtos = await context.Events
+                    .Where(e => e.AggregateId == aggregateId)
+                    .Where(e => e.Type == eventType)
+                    .OrderBy(e => e.AggregateVersion)
+                    .AsNoTracking()
+                    .ToListAsync(); // Todo: CT
+
+                return eventDtos
+                    .Select(Deserialize)
+                    .Cast<T>()
+                    .ToList()
+                    .AsReadOnly();
+            }
+        }
+
         public async Task<IReadOnlyCollection<IDomainEvent>> Get(Guid aggregateId, int fromVersion)
         {
             using (var context = await _frameworkContextFactory.CreateContext())

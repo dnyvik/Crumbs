@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 
-namespace Crumbs.EventualConsistency
+namespace Crumbs.EventualConsistency.Extensions
 {
     public static class ObservableExtensions
     {
